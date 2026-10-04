@@ -8,16 +8,19 @@ import (
 )
 
 // ssh claude@localvm "docker rm helper; docker run ... sh -c 'ls -lRa /data/'"
-// main.go gives VerifyAccess strings.Join(os.Args[1:], " ").
+// main.go gives VerifyAccess os.Args[1:].
 func TestVerifyAccessNonGitCommandWithQuotes(t *testing.T) {
 	conf := &config.Config{
 		Allowed: []config.AllowedRule{
 			{Host: "localvm"},
 		},
 	}
-	cmd := "claude@localvm docker rm helper; docker run -v caddy-cert:/data --name helper busybox sh -c 'ls -lRa /data/'"
+	args := []string{
+		"claude@localvm",
+		"docker rm helper; docker run -v caddy-cert:/data --name helper busybox sh -c 'ls -lRa /data/'",
+	}
 
-	rule, err := VerifyAccess(cmd, conf)
+	rule, err := VerifyAccess(args, conf)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, rule)
@@ -29,9 +32,12 @@ func TestVerifyAccessNonGitCommandWithDoubleQuotes(t *testing.T) {
 			{Host: "localvm"},
 		},
 	}
-	cmd := `claude@localvm docker rm helper; docker run -v caddy-cert:/data --name helper busybox sh -c "ls -lRa /data/"`
+	args := []string{
+		"claude@localvm",
+		`docker rm helper; docker run -v caddy-cert:/data --name helper busybox sh -c "ls -lRa /data/"`,
+	}
 
-	rule, err := VerifyAccess(cmd, conf)
+	rule, err := VerifyAccess(args, conf)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, rule)
